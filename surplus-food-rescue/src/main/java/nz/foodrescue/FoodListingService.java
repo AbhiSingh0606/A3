@@ -27,6 +27,10 @@ public class FoodListingService {
             throw new UnauthorizedDonorException("Action Unauthorized: Only verified food"
                     + " donors are permitted to set up listings");
         }
+        if (!expiry.isAfter(clock.instant())) {
+            throw new InvalidListingException("Invalid Expiry Date: Food expiry date and"
+                    + " time must be set in the future");
+        }
         if (Duration.between(pickupStart, pickupEnd).compareTo(MIN_WINDOW) < 0) {
             throw new InvalidListingException("Invalid Pickup Window: The end time must be"
                     + " at least 30 minutes after the start time");
