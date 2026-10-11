@@ -20,7 +20,10 @@ public class FoodListingService {
     /** Creates a listing and returns its ID. */
     public String createListing(String donorId, String itemName, int quantity,
                                 Instant expiry, Instant pickupStart, Instant pickupEnd) {
-        donorVerifier.isVerified(donorId);
+        if (!donorVerifier.isVerified(donorId)) {
+            throw new UnauthorizedDonorException("Action Unauthorized: Only verified food"
+                    + " donors are permitted to set up listings");
+        }
         return listingRepository.save(
                 new FoodListing(donorId, itemName, quantity, expiry, pickupStart, pickupEnd));
     }
