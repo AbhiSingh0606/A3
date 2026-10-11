@@ -117,4 +117,32 @@ class FoodListingServiceTest {
         assertEquals("Invalid Item Name: Item name is required", ex.getMessage());
         verify(listingRepository, never()).save(any());
     }
+
+    @ParameterizedTest
+    @ValueSource(longs = {30, 31})
+    void createListing_windowAtOrAboveMinimum_savesListing(long minutes) {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+        when(listingRepository.save(any(FoodListing.class))).thenReturn("L-1");
+
+        assertEquals("L-1", create(ITEM, 5, EXPIRY, minutes));
+    }
+
+    @Test
+    void createListing_quantityOfOneAndExpiryOneMinuteAway_savesListing() {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+        when(listingRepository.save(any(FoodListing.class))).thenReturn("L-1");
+
+        assertEquals("L-1", create(ITEM, 1, NOW.plusSeconds(60), 60));
+    }
+
+    @Test
+    void createListing_expiredAndZeroQuantity_reportsExpiryFirst() {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+
+        InvalidListingException ex = assertThrows(InvalidListingException.class,
+                () -> create(ITEM, 0, NOW.minusSeconds(60), 60));
+
+        assertEquals("Invalid Expiry Date: Food expiry date and time must be set"
+                + " in the future", ex.getMessage());
+    }
 }
