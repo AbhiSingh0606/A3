@@ -77,4 +77,17 @@ class FoodListingServiceTest {
         assertEquals("Invalid Quantity: Please enter a positive number", ex.getMessage());
         verify(listingRepository, never()).save(any());
     }
+
+    @ParameterizedTest
+    @ValueSource(longs = {29, 0, -10})
+    void createListing_windowUnder30MinutesOrReversed_throwsInvalidWindow(long minutes) {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+
+        InvalidListingException ex = assertThrows(InvalidListingException.class,
+                () -> create(ITEM, 5, EXPIRY, minutes));
+
+        assertEquals("Invalid Pickup Window: The end time must be at least 30 minutes"
+                + " after the start time", ex.getMessage());
+        verify(listingRepository, never()).save(any());
+    }
 }
