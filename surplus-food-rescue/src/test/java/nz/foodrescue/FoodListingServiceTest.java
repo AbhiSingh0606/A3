@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -101,6 +102,19 @@ class FoodListingServiceTest {
 
         assertEquals("Invalid Expiry Date: Food expiry date and time must be set"
                 + " in the future", ex.getMessage());
+        verify(listingRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"   "})
+    void createListing_blankItemName_throwsInvalidItemName(String itemName) {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+
+        InvalidListingException ex = assertThrows(InvalidListingException.class,
+                () -> create(itemName, 5, EXPIRY, 60));
+
+        assertEquals("Invalid Item Name: Item name is required", ex.getMessage());
         verify(listingRepository, never()).save(any());
     }
 }
