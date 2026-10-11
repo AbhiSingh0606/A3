@@ -90,4 +90,17 @@ class FoodListingServiceTest {
                 + " after the start time", ex.getMessage());
         verify(listingRepository, never()).save(any());
     }
+
+    @ParameterizedTest
+    @ValueSource(longs = {-60, 0})
+    void createListing_expiryNotInFuture_throwsInvalidExpiry(long secondsFromNow) {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+
+        InvalidListingException ex = assertThrows(InvalidListingException.class,
+                () -> create(ITEM, 5, NOW.plusSeconds(secondsFromNow), 60));
+
+        assertEquals("Invalid Expiry Date: Food expiry date and time must be set"
+                + " in the future", ex.getMessage());
+        verify(listingRepository, never()).save(any());
+    }
 }
