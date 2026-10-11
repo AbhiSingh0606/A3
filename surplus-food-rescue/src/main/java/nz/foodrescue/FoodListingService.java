@@ -1,10 +1,13 @@
 package nz.foodrescue;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 
 /** Creates surplus food listings (NZ-01). */
 public class FoodListingService {
+    private static final Duration MIN_WINDOW = Duration.ofMinutes(30);
+
     private final DonorVerifier donorVerifier;
     private final ListingRepository listingRepository;
     private final Clock clock;
@@ -23,6 +26,10 @@ public class FoodListingService {
         if (!donorVerifier.isVerified(donorId)) {
             throw new UnauthorizedDonorException("Action Unauthorized: Only verified food"
                     + " donors are permitted to set up listings");
+        }
+        if (Duration.between(pickupStart, pickupEnd).compareTo(MIN_WINDOW) < 0) {
+            throw new InvalidListingException("Invalid Pickup Window: The end time must be"
+                    + " at least 30 minutes after the start time");
         }
         if (quantity <= 0) {
             throw new InvalidListingException(
