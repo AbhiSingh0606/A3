@@ -14,6 +14,8 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -61,6 +63,18 @@ class FoodListingServiceTest {
 
         assertEquals("Action Unauthorized: Only verified food donors are permitted"
                 + " to set up listings", ex.getMessage());
+        verify(listingRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void createListing_nonPositiveQuantity_throwsInvalidQuantity(int quantity) {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(true);
+
+        InvalidListingException ex = assertThrows(InvalidListingException.class,
+                () -> create(ITEM, quantity, EXPIRY, 60));
+
+        assertEquals("Invalid Quantity: Please enter a positive number", ex.getMessage());
         verify(listingRepository, never()).save(any());
     }
 }
