@@ -1,7 +1,10 @@
 package nz.foodrescue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -47,5 +50,17 @@ class FoodListingServiceTest {
         String id = create(ITEM, 5, EXPIRY, 60);
 
         assertEquals("L-1", id);
+    }
+
+    @Test
+    void createListing_unverifiedDonor_throwsUnauthorizedAndSavesNothing() {
+        when(donorVerifier.isVerified(DONOR_ID)).thenReturn(false);
+
+        UnauthorizedDonorException ex = assertThrows(UnauthorizedDonorException.class,
+                () -> create(ITEM, 5, EXPIRY, 60));
+
+        assertEquals("Action Unauthorized: Only verified food donors are permitted"
+                + " to set up listings", ex.getMessage());
+        verify(listingRepository, never()).save(any());
     }
 }
