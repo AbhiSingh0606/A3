@@ -24,6 +24,10 @@ public class FoodListingService {
             throw new UnauthorizedDonorException("Action Unauthorized: Only verified food"
                     + " donors are permitted to set up listings");
         }
+        if (quantity <= 0) {
+            throw new InvalidListingException(
+                    "Invalid Quantity: Please enter a positive number");
+        }
         return listingRepository.save(
                 new FoodListing(donorId, itemName, quantity, expiry, pickupStart, pickupEnd));
     }
