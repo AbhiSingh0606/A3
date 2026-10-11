@@ -20,6 +20,8 @@ public class FoodListingService {
     /** Creates a listing and returns its ID. */
     public String createListing(String donorId, String itemName, int quantity,
                                 Instant expiry, Instant pickupStart, Instant pickupEnd) {
-        return null;
+        donorVerifier.isVerified(donorId);
+        return listingRepository.save(
+                new FoodListing(donorId, itemName, quantity, expiry, pickupStart, pickupEnd));
     }
 }
