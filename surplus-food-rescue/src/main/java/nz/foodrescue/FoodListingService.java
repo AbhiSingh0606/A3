@@ -27,6 +27,9 @@ public class FoodListingService {
             throw new UnauthorizedDonorException("Action Unauthorized: Only verified food"
                     + " donors are permitted to set up listings");
         }
+        if (itemName == null || itemName.isBlank()) {
+            throw new InvalidListingException("Invalid Item Name: Item name is required");
+        }
         if (!expiry.isAfter(clock.instant())) {
             throw new InvalidListingException("Invalid Expiry Date: Food expiry date and"
                     + " time must be set in the future");
